@@ -1,0 +1,7 @@
+{
+  "name": "CodeScanner",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "ionic-angular"
+}
