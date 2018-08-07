@@ -1,8 +1,6 @@
 <ion-header>
   <ion-navbar>
-    <ion-title>
-      Ionic Blank
-    </ion-title>
+      <ion-title>Barcode/QR Scanner v1.0 </ion-title>
   </ion-navbar>
 </ion-header>
 
@@ -11,4 +9,12 @@
   <p>
     If you get lost, the <a href="http://ionicframework.com/docs/v2">docs</a> will be your guide.
   </p>
+  <button ion-button (click)="scanQr()">Scan ... </button>
+  <div *ngIf="scanData">
+      <p>Scanned Text : </p>
+      <p>Scanned Format : </p>
+
+  </div>
+  <ion-input type="text" [(ngModel)]="encodeData" ></ion-input>   
+  <button ion-button (click)="encodeText()">Encode Text</button>
 </ion-content>
