@@ -5,9 +5,13 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
 import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 import { QRScanner } from '@ionic-native/qr-scanner';
+import { HttpClientModule } from "@angular/common/http";
+import { File } from '@ionic-native/file';
+import { IonicStorageModule } from '@ionic/storage';
 
 import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
+import { UserServiceProvider } from '../providers/user-service/user-service';
 
 @NgModule({
   declarations: [
@@ -16,7 +20,9 @@ import { HomePage } from '../pages/home/home';
   ],
   imports: [
     BrowserModule,
-    IonicModule.forRoot(MyApp),    
+    HttpClientModule,
+    IonicModule.forRoot(MyApp),   
+    IonicStorageModule.forRoot() 
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -28,7 +34,9 @@ import { HomePage } from '../pages/home/home';
     SplashScreen,
     BarcodeScanner,
     QRScanner,
-    {provide: ErrorHandler, useClass: IonicErrorHandler}
+    File,
+    {provide: ErrorHandler, useClass: IonicErrorHandler},
+    UserServiceProvider
   ]
 })
 export class AppModule {}

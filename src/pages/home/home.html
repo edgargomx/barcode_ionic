@@ -1,20 +1,64 @@
 <ion-header>
   <ion-navbar>
-      <ion-title>Barcode/QR Scanner v1.0 </ion-title>
+      <ion-title>RA - RUN ON</ion-title>
   </ion-navbar>
 </ion-header>
 
-<ion-content padding>
-  The world is your oyster.
+<ion-content >
+  Reto de Altura
   <p>
-    If you get lost, the <a href="http://ionicframework.com/docs/v2">docs</a> will be your guide.
+    Escanear codigo:
   </p>
-  <button ion-button (click)="scanQr()">Scan ... </button>
+  <button ion-button (click)="scan()">Scan ... </button>
+  <hr>
+  <p>Buscar corredor:</p>
+  <input class="form-comtrol" type="text" placeholder="Codigo corredor..." #inputCorredor>
+  <button ion-button (click)="search(inputCorredor.value)">Buscar </button>
   <div *ngIf="scanData">
-      <p>Scanned Text : </p>
-      <p>Scanned Format : </p>
+    <p>codigo : {{ scanData.text }} </p>
+    <p>param: {{  param }}</p>
+  </div>
+  <div *ngIf="userInfo != undefined">
+
+      <p>No. Inscripcion : {{ userInfo.inscripcion }} </p>
+      <p>Nombre : {{ userInfo.nombre }} </p>
+      <p>distancia : {{ userInfo.distancia }} </p>
+      <p>Evento : {{ userInfo.evento }} </p>
+      <p>Corredor : {{ userInfo.corredor }} </p>      
+      <p>numero : {{ userInfo.numero }} </p>
+      <p>codigo : {{ userInfo.codigo }} </p>
 
   </div>
-  <ion-input type="text" [(ngModel)]="encodeData" ></ion-input>   
-  <button ion-button (click)="encodeText()">Encode Text</button>
+  <!--ion-input type="text" [(ngModel)]="encodeData" ></ion-input>   
+  <button ion-button (click)="encodeText()">Encode Text</button-->
+
+  <!--div #fixedContainer>
+    <ion-row>
+      <ion-col *ngFor="let color of colors" [style.background]="color" class="color-block" tappable (click)="selectColor(color)"></ion-col>
+    </ion-row>
+ 
+    <ion-row radio-group [(ngModel)]="selectedColor">
+      <ion-col *ngFor="let color of colors" text-center>
+        <ion-radio [value]="color"></ion-radio>
+      </ion-col>
+    </ion-row>
+ 
+    <canvas #imageCanvas (touchstart)="startDrawing($event)" (touchmove)="moved($event)"></canvas>
+ 
+    <button ion-button full (click)="saveCanvasImage()">Save Image</button>
+  </div>
+ 
+  <ion-list *ngIf="storedImages.length > 0">
+    <ion-list-header>Previous Drawings</ion-list-header>
+    <ion-card *ngFor="let obj of storedImages; let i = index">
+      <ion-card-content>
+        <img [src]="getImagePath(obj.img)">
+      </ion-card-content>
+      <ion-row>
+        <button ion-button full icon-only color="danger" (click)="removeImageAtIndex(i)">
+          <ion-icon name="trash"></ion-icon>
+        </button>
+      </ion-row>
+    </ion-card>
+  </ion-list-->
 </ion-content>
