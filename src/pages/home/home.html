@@ -4,31 +4,28 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content >
-  Reto de Altura
-  <p>
-    Escanear codigo:
-  </p>
-  <button ion-button (click)="scan()">Scan ... </button>
+<ion-content class="centrado"  >
+  <ion-img style="width: 80px; height: 80px;" src="assets/imgs/logo.png"></ion-img>
   <hr>
-  <p>Buscar corredor:</p>
-  <input class="form-comtrol" type="text" placeholder="Codigo corredor..." #inputCorredor>
-  <button ion-button (click)="search(inputCorredor.value)">Buscar </button>
-  <div *ngIf="scanData">
-    <p>codigo : {{ scanData.text }} </p>
-    <p>param: {{  param }}</p>
-  </div>
-  <div *ngIf="userInfo != undefined">
+  <ion-list>
+    <ion-item>
+      <ion-label color="primary" stacked>Escanear codigo :</ion-label>
+      <!--ion-input type="tel" placeholder="Tel Input"></ion-input-->
+      
+    </ion-item>
+    <button ion-button round (click)="scan()">Escanear ... </button>
+    
+      <ion-label color="primary" fixed class="center-text">Ó</ion-label>
+      <!--ion-input type="tel" placeholder="Tel Input"></ion-input-->
+    
 
-      <p>No. Inscripcion : {{ userInfo.inscripcion }} </p>
-      <p>Nombre : {{ userInfo.nombre }} </p>
-      <p>distancia : {{ userInfo.distancia }} </p>
-      <p>Evento : {{ userInfo.evento }} </p>
-      <p>Corredor : {{ userInfo.corredor }} </p>      
-      <p>numero : {{ userInfo.numero }} </p>
-      <p>codigo : {{ userInfo.codigo }} </p>
-
-  </div>
+    <ion-item>
+      <ion-label color="primary" stacked>Buscar corredor :</ion-label>
+      <ion-input type="tel" placeholder="Codigo corredor..." clearInput #inputCorredor></ion-input>
+    </ion-item>
+    <button ion-button round (click)="searchByCode(inputCorredor.value)">Buscar ... </button>
+  </ion-list>
+  
   <!--ion-input type="text" [(ngModel)]="encodeData" ></ion-input>   
   <button ion-button (click)="encodeText()">Encode Text</button-->
 

@@ -1,19 +1,83 @@
-import { Component, ViewChild, Renderer, OnInit, AfterViewInit } from '@angular/core';
-import { NavController,NavParams, Platform, Content, normalizeURL } from 'ionic-angular';
+import { Component, ViewChild, Renderer } from '@angular/core';
+import { NavController,NavParams, Platform, Content, normalizeURL, ViewController, ToastController  } from 'ionic-angular';
 import { BarcodeScanner ,BarcodeScannerOptions } from '@ionic-native/barcode-scanner';
 import { QRScanner, QRScannerStatus } from '@ionic-native/qr-scanner';
 import { File, IWriteOptions } from '@ionic-native/file';
 import { Storage } from '@ionic/storage';
 import { UserServiceProvider } from '../../providers/user-service/user-service';
+import { ModalController } from 'ionic-angular';
 
 
 const STORAGE_KEY = 'IMAGE_LIST';
 
 @Component({
+  template : `
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>
+          Descripción
+        </ion-title>
+        <ion-buttons start>
+          <button ion-button (click)="dismiss()">
+            <span ion-text color="primary" showWhen="ios">Cancel</span>
+            <ion-icon name="md-close" showWhen="android, windows"></ion-icon>
+          </button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <ion-list>
+          <ion-item>
+            <ion-avatar item-start>
+              <!--img src="{{character.image}}"-->
+            </ion-avatar>
+            
+            <div *ngIf="userInfo != undefined">
+                <p>No. Evento :</p> {{ userInfo.evento }} 
+                <p>Nombre : </p> {{ userInfo.nombre }} 
+                <p>No. Corredor : </p> {{ userInfo.numero }} 
+                <p>Distancia : </p> {{ userInfo.distancia }} 
+                <p>Categoria : </p> {{ userInfo.categoria }}  
+                <p>Tipo Código : </p> {{ userInfo.codigo }} 
+                <p>Estatus Pago : </p>{{ userInfo.status }} 
+                <p>Descrip. Pago :</p>
+                <ul>
+                  <li *ngFor="let p of productos">{{ p }}</li>
+                </ul>                      
+                <!--p>Lista Compra : {{ userInfo.codigo }} </p-->                     
+                <!--p>Lista Asientos Trasporte : {{ userInfo.numero }} </p-->
+                
+            </div>
+          </ion-item>
+          <button ion-button round (click)="dismiss()">Cerrar</button>
+      </ion-list>
+    </ion-content>`
+    })
+export class Profile {
+  userInfo;
+  productos = [];
+ constructor(params: NavParams,public platform: Platform, public viewCtrl: ViewController) {
+   this.userInfo = JSON.parse(params.get('user'));
+   console.log(this.userInfo);
+   if (this.userInfo.descr !== null) {
+    this.productos = this.userInfo.descr.replace('Inscripción,','').replace(',Cargo por servicio','').split(',');
+   }
+   
+   console.log(this.productos);
+   console.log('User', this.userInfo);
+ }
+ dismiss() {
+  this.viewCtrl.dismiss();
+  }
+
+}
+
+@Component({
   selector: 'page-home',
-  templateUrl: 'home.html'
+  templateUrl: 'home.html',
+  entryComponents:[ Profile ]
 })
-export class HomePage implements OnInit, AfterViewInit {
+export class HomePage {
   scanData : {};
   options :BarcodeScannerOptions;
   encodeData : string ;
@@ -38,12 +102,14 @@ export class HomePage implements OnInit, AfterViewInit {
   colors = [ '#9e2956', '#c2281d', '#de722f', '#edbf4c', '#5db37e', '#459cde', '#4250ad', '#802fa3' ];
   
   userInfo;
-  param; // = '023f12b8e1d9987cc9a497bb7beeb93b';
+  param ; // = '023f12b8e1d9987cc9a497bb7beeb93b';
   constructor(public navCtrl: NavController, 
               public navParams: NavParams,
               private barcodeScanner: BarcodeScanner,private qrScanner: QRScanner,
               private file: File, private storage: Storage, 
+              public modalCtrl: ModalController,
               public renderer: Renderer, private plt: Platform,
+              private toastCtrl: ToastController,
               public userService: UserServiceProvider
             ) {
               // Load all stored images when the app is ready
@@ -58,21 +124,11 @@ export class HomePage implements OnInit, AfterViewInit {
 
   }
 
-  ngAfterViewInit(){
-      //console.log(this.content._scrollContent);
-       // this.content._scrollContent.nativeElement.style.marginTop = "35px";
-  }
-
-  ngOnInit(){
-    
-  }
-
   scan(){
     this.options = {
         prompt : "Scan your barcode "
     }
     this.barcodeScanner.scan(this.options).then((barcodeData) => {
-
         console.log(barcodeData);
         this.scanData = barcodeData;
         this.param = barcodeData.text;        
@@ -93,16 +149,23 @@ export class HomePage implements OnInit, AfterViewInit {
     });                 
   }
   
+  searchByCode(code) {
+    this.param = code;
+    this.getInfoRunner();
+  }
+
   getInfoRunner(){
-    console.log(this.userInfo);
+    console.log(this.param);
     this.userService.getInfoRunner(this.param).subscribe(
       (response) => {
-        //const res = JSON.parse(response.toString());
-        if (response['error'] === 0){
-          console.log(response['msg']);
-          this.userInfo = response['msg'];
+        const res = JSON.parse(response['_body']);
+        console.log(res);
+        if (res.error === 0){
+          this.userInfo = res.msg;
+          this.presentModal(this.userInfo);
         }else{
-          console.log(response['msg']);
+          console.log(res);
+          this.presentToast(res.msg)
         }
         
       },
@@ -111,6 +174,26 @@ export class HomePage implements OnInit, AfterViewInit {
       }
     );
   }
+ 
+  presentModal(user) {
+    const modal = this.modalCtrl.create(Profile, { user: JSON.stringify(user) });
+    modal.present();
+  }
+
+  presentToast(message) {
+    let toast = this.toastCtrl.create({
+      message: message,
+      duration: 2000,
+      position: 'top'
+    });
+  
+    toast.onDidDismiss(() => {
+      console.log('Dismissed toast');
+    });
+  
+    toast.present();
+  }
+
   ionViewDidEnter() {
     // https://github.com/ionic-team/ionic/issues/9071#issuecomment-362920591
     // Get the height of the fixed item
@@ -128,7 +211,6 @@ export class HomePage implements OnInit, AfterViewInit {
     this.canvasElement.width = this.plt.width() + '';
     this.canvasElement.height = 200;
 */
-    this.getInfoRunner();
   //  console.log(this.content._scrollContent);
    // this.content._scrollContent.nativeElement.style.marginTop = "35px";
  
