@@ -1,4 +1,4 @@
-import { Component, ViewChild, Renderer } from '@angular/core';
+import { Component, ViewChild, Renderer, AfterViewInit } from '@angular/core';
 import { NavController,NavParams, Platform, Content, normalizeURL, ViewController, ToastController  } from 'ionic-angular';
 import { BarcodeScanner ,BarcodeScannerOptions } from '@ionic-native/barcode-scanner';
 import { QRScanner, QRScannerStatus } from '@ionic-native/qr-scanner';
@@ -6,7 +6,7 @@ import { File, IWriteOptions } from '@ionic-native/file';
 import { Storage } from '@ionic/storage';
 import { UserServiceProvider } from '../../providers/user-service/user-service';
 import { ModalController } from 'ionic-angular';
-
+import { SignaturePad } from 'angular2-signaturepad/signature-pad';
 
 const STORAGE_KEY = 'IMAGE_LIST';
 
@@ -25,42 +25,100 @@ const STORAGE_KEY = 'IMAGE_LIST';
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
-    <ion-content>
+    <ion-content class="centrado">
       <ion-list>
-          <ion-item>
-            <ion-avatar item-start>
-              <!--img src="{{character.image}}"-->
-            </ion-avatar>
-            
+            <ion-item *ngIf="userInfo.kit_entregado !== null" class="text-red-center">
+              <p>Kit Entregado : </p>{{ userInfo.kit_entregado }}
+            </ion-item>
             <div *ngIf="userInfo != undefined">
+              <ion-item>
                 <p>No. Evento :</p> {{ userInfo.evento }} 
-                <p>Nombre : </p> {{ userInfo.nombre }} 
+              </ion-item>
+              <ion-item>
+                <p>Nombre : </p> {{ userInfo.nombre }} {{ userInfo.paterno }} {{ userInfo.materno }} 
+              </ion-item>
+              <ion-item>
                 <p>No. Corredor : </p> {{ userInfo.numero }} 
+              </ion-item>
+              <ion-item>
                 <p>Distancia : </p> {{ userInfo.distancia }} 
-                <p>Categoria : </p> {{ userInfo.categoria }}  
+              </ion-item>
+              <ion-item>
+                <p>Categoria : </p> {{ userInfo.categoria }} ({{ sexo }})
+              </ion-item>
+              <ion-item>
                 <p>Tipo Código : </p> {{ userInfo.codigo }} 
+              </ion-item>
+              <ion-item>
                 <p>Estatus Pago : </p>{{ userInfo.status }} 
-                <p>Descrip. Pago :</p>
+              </ion-item>
+              <ion-item>
+                <p>Productos :</p>
                 <ul>
                   <li *ngFor="let p of productos">{{ p }}</li>
                 </ul>                      
                 <!--p>Lista Compra : {{ userInfo.codigo }} </p-->                     
                 <!--p>Lista Asientos Trasporte : {{ userInfo.numero }} </p-->
-                
+              </ion-item>
             </div>
-          </ion-item>
+            <signature-pad *ngIf="showFirma" [options]="signaturePadOptions" (onBeginEvent)="drawStart()" (onEndEvent)="drawComplete()"></signature-pad>
+            <button ion-button round (click)="showAreaSing()" *ngIf="showFirma"> Firmar</button>
+            <button ion-button round (click)="entregarPaquete()" *ngIf="userInfo.kit_entregado === null"> Entregar Kit</button>
+          <ion-item *ngIf="userInfo.kit_entregado !== null" class="text-red-center">
+              <p>Kit Entregado : </p>{{ userInfo.kit_entregado }}
+            </ion-item>        
           <button ion-button round (click)="dismiss()">Cerrar</button>
       </ion-list>
     </ion-content>`
     })
 export class Profile {
+  @ViewChild(SignaturePad) signaturePad: SignaturePad;
+  private signaturePadOptions: Object = { // passed through to szimek/signature_pad constructor
+    'minWidth': 5,
+    'canvasWidth': 500,
+    'canvasHeight': 300
+  };
   userInfo;
   productos = [];
- constructor(params: NavParams,public platform: Platform, public viewCtrl: ViewController) {
+  sexo;
+  showFirma = false;
+ constructor(params: NavParams,
+            public userService: UserServiceProvider,
+            public platform: Platform, 
+            private toastCtrl: ToastController,
+            public viewCtrl: ViewController) {
    this.userInfo = JSON.parse(params.get('user'));
    console.log(this.userInfo);
+
    if (this.userInfo.descr !== null) {
-    this.productos = this.userInfo.descr.replace('Inscripción,','').replace(',Cargo por servicio','').split(',');
+         let aux = this.userInfo.descr.replace('Inscripción,','')
+         .replace(';Cargo por servicio,','')
+         .replace(';Cargo por servicio','')
+         .replace(',Cargo por servicio,','')
+         .replace(',Cargo por servicio','')
+         .replace('Cargo por servicio,','')
+         .replace('Cargo por servicio','')
+         .replace(',Descuento,','')
+         .replace(',Descuento','')
+         .replace('Descuento,','')
+         .replace('Descuento','');
+         if ( aux === "" ) {
+          this.productos = ['NO HAY PRODUCTOS'];
+         } else {
+          aux = aux.split(',');
+          if(aux[0] === ""){
+            this.productos = ['NO HAY PRODUCTOS'];
+          } else {
+           this.productos = aux;
+          }
+         }
+       }else{
+         this.productos = ['NO HAY PRODUCTOS'];
+       }
+   if ( this.userInfo.catego_sexo === "0") {
+    this.sexo = "Femenil";
+   } else {
+    this.sexo = "Varonil";
    }
    
    console.log(this.productos);
@@ -68,6 +126,52 @@ export class Profile {
  }
  dismiss() {
   this.viewCtrl.dismiss();
+  }
+  entregarPaquete(){
+    console.log(this.userInfo);
+    this.userService.setKitEntregado(parseInt(this.userInfo.inscripcion, 10)).subscribe(res => {
+      console.log(res);
+      if (res['error'] === 0) {
+         this.userInfo.kit_entregado = res['msg'];
+      }else {
+        console.log(res);
+          this.presentToast(res['msg'])
+      }
+    });
+  }
+
+  presentToast(message) {
+    let toast = this.toastCtrl.create({
+      message: message,
+      duration: 2000,
+      position: 'top',
+    });
+  
+    toast.onDidDismiss(() => {
+      console.log('Dismissed toast');
+    });
+  
+    toast.present();
+  }
+
+  showAreaSing(){
+    this.showFirma = true;
+  }
+
+  ngAfterViewInit() {
+    // this.signaturePad is now available
+    this.signaturePad.set('minWidth', 5); // set szimek/signature_pad options at runtime
+    this.signaturePad.clear(); // invoke functions from szimek/signature_pad API
+  }
+ 
+  drawComplete() {
+    // will be notified of szimek/signature_pad's onEnd event
+    console.log(this.signaturePad.toDataURL());
+  }
+ 
+  drawStart() {
+    // will be notified of szimek/signature_pad's onBegin event
+    console.log('begin drawing');
   }
 
 }
@@ -85,6 +189,7 @@ export class HomePage {
 
   // Canvas stuff
   @ViewChild('imageCanvas') canvas: any;
+  
   canvasElement: any;
  
   saveX: number;
@@ -126,7 +231,7 @@ export class HomePage {
 
   scan(){
     this.options = {
-        prompt : "Scan your barcode "
+        prompt : "Escanear QR del participante"
     }
     this.barcodeScanner.scan(this.options).then((barcodeData) => {
         console.log(barcodeData);
@@ -158,14 +263,14 @@ export class HomePage {
     console.log(this.param);
     this.userService.getInfoRunner(this.param).subscribe(
       (response) => {
-        const res = JSON.parse(response['_body']);
+        const res = response; //JSON.parse(response.toString());
         console.log(res);
-        if (res.error === 0){
-          this.userInfo = res.msg;
+        if (res['error'] === 0){
+          this.userInfo = res['msg'];
           this.presentModal(this.userInfo);
         }else{
           console.log(res);
-          this.presentToast(res.msg)
+          this.presentToast(res['msg'])
         }
         
       },
@@ -193,6 +298,8 @@ export class HomePage {
   
     toast.present();
   }
+
+  
 
   ionViewDidEnter() {
     // https://github.com/ionic-team/ionic/issues/9071#issuecomment-362920591

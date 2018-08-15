@@ -9,6 +9,8 @@ import { HttpClientModule } from "@angular/common/http";
 import { HttpModule } from '@angular/http';
 import { File } from '@ionic-native/file';
 import { IonicStorageModule } from '@ionic/storage';
+import { Camera } from '@ionic-native/camera';
+import { SignaturePadModule } from 'angular2-signaturepad';
 
 import { MyApp } from './app.component';
 import { HomePage, Profile } from '../pages/home/home';
@@ -24,6 +26,7 @@ import { UserServiceProvider } from '../providers/user-service/user-service';
     BrowserModule,
     HttpClientModule,
     HttpModule,
+    SignaturePadModule,
     IonicModule.forRoot(MyApp),   
     IonicStorageModule.forRoot() 
   ],
@@ -38,6 +41,7 @@ import { UserServiceProvider } from '../providers/user-service/user-service';
     SplashScreen,
     BarcodeScanner,
     QRScanner,
+    Camera,
     File,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     UserServiceProvider

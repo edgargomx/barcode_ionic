@@ -10,25 +10,29 @@ import { Observable } from '../../../node_modules/rxjs/Observable';
   and Angular DI.
 */
 const api_key = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3IiOiJNb2JpbGVBcHAiLCJlbnQiOiJSZXRvRGVBbHR1cmEifQ.ez01RSCjLqDhDh2uzA7mW1XpmIneNxdtFQXYX8Cjdyc';
-
+const httpOptions = {
+  headers: new HttpHeaders().set( 'Authorization', api_key ).set('Content-Type' , 'application/json')
+};
 @Injectable()
 export class UserServiceProvider {
 
-  constructor(public http: Http) {
+  constructor(public http: HttpClient) {
     console.log('Hello UserServiceProvider Provider');
   }
 
   getInfoRunner(dataRunner: string) {
-    const httpOptions = {
-      headers: new HttpHeaders({ 'Authorization': api_key })
-    };
+    
     let headers = new Headers();
     headers.append('Authorization', api_key);
-    return this.http.get(`https://retodealtura.mx/app_api.php?qr=${ dataRunner }`, {headers: headers});
+    return this.http.get(`https://retodealtura.mx/app_api.php?qr=${ dataRunner }`, httpOptions);
   }
 
   getInfoRunnerCode(dataRunner: string) {
     return this.http.get(`https://retodealtura.mx/app_api.php?code=${ dataRunner }`);
   }
 
+  setKitEntregado(id_runner) {
+    const id = id_runner;
+    return this.http.post('https://retodealtura.mx/app_api.php', {id: id_runner}, httpOptions );
+  }
 }
