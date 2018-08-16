@@ -13,14 +13,16 @@ import { Camera } from '@ionic-native/camera';
 import { SignaturePadModule } from 'angular2-signaturepad';
 
 import { MyApp } from './app.component';
-import { HomePage, Profile } from '../pages/home/home';
+import { HomePage } from '../pages/home/home';
+import { PerfilPage } from '../pages/perfil/perfil';
 import { UserServiceProvider } from '../providers/user-service/user-service';
 
 @NgModule({
   declarations: [
     MyApp,
     HomePage,
-    Profile
+    PerfilPage
+
   ],
   imports: [
     BrowserModule,
@@ -34,7 +36,8 @@ import { UserServiceProvider } from '../providers/user-service/user-service';
   entryComponents: [
     MyApp,
     HomePage,
-    Profile,
+    PerfilPage
+    
   ],
   providers: [
     StatusBar,
