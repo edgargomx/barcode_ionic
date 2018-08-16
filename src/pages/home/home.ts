@@ -1,4 +1,4 @@
-import { Component, ViewChild, Renderer, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, Renderer } from '@angular/core';
 import { NavController,NavParams, Platform, Content, normalizeURL, ViewController, ToastController  } from 'ionic-angular';
 import { BarcodeScanner ,BarcodeScannerOptions } from '@ionic-native/barcode-scanner';
 import { QRScanner, QRScannerStatus } from '@ionic-native/qr-scanner';
@@ -60,10 +60,20 @@ const STORAGE_KEY = 'IMAGE_LIST';
                 <!--p>Lista Compra : {{ userInfo.codigo }} </p-->                     
                 <!--p>Lista Asientos Trasporte : {{ userInfo.numero }} </p-->
               </ion-item>
+              <ion-item *ngIf="showFirma">
+                <signature-pad *ngIf="userInfo.kit_entregado === null" [options]="signaturePadOptions" (onBeginEvent)="drawStart()" (onEndEvent)="drawComplete()"></signature-pad>
+                                
+                <img *ngIf="userInfo.kit_entregado !== null" style="max-width: 100%; height: auto;" src="{{ imgFirma }}" />
+                </ion-item>
+              <div *ngIf="showFirma && userInfo.kit_entregado === null">
+                <button ion-button round (click)="cleanSingArea()" > Limpiar</button>
+                <button ion-button round (click)="saveSing()" > Guardar</button>
+              </div>
+
             </div>
-            <signature-pad *ngIf="showFirma" [options]="signaturePadOptions" (onBeginEvent)="drawStart()" (onEndEvent)="drawComplete()"></signature-pad>
-            <button ion-button round (click)="showAreaSing()" *ngIf="showFirma"> Firmar</button>
-            <button ion-button round (click)="entregarPaquete()" *ngIf="userInfo.kit_entregado === null"> Entregar Kit</button>
+            
+            <!--button ion-button round (click)="showAreaSing()" *ngIf="userInfo.kit_entregado === null"> Firmar</button-->
+            <button ion-button round (click)="entregarPaquete()" *ngIf="userInfo.kit_entregado === null && !showFirma"> Entregar Kit</button>
           <ion-item *ngIf="userInfo.kit_entregado !== null" class="text-red-center">
               <p>Kit Entregado : </p>{{ userInfo.kit_entregado }}
             </ion-item>        
@@ -71,17 +81,18 @@ const STORAGE_KEY = 'IMAGE_LIST';
       </ion-list>
     </ion-content>`
     })
-export class Profile {
+export class Profile{
   @ViewChild(SignaturePad) signaturePad: SignaturePad;
   private signaturePadOptions: Object = { // passed through to szimek/signature_pad constructor
     'minWidth': 5,
-    'canvasWidth': 500,
+    'canvasWidth': 700,
     'canvasHeight': 300
   };
   userInfo;
   productos = [];
   sexo;
   showFirma = false;
+  imgFirma;
  constructor(params: NavParams,
             public userService: UserServiceProvider,
             public platform: Platform, 
@@ -129,15 +140,7 @@ export class Profile {
   }
   entregarPaquete(){
     console.log(this.userInfo);
-    this.userService.setKitEntregado(parseInt(this.userInfo.inscripcion, 10)).subscribe(res => {
-      console.log(res);
-      if (res['error'] === 0) {
-         this.userInfo.kit_entregado = res['msg'];
-      }else {
-        console.log(res);
-          this.presentToast(res['msg'])
-      }
-    });
+    this.showAreaSing();    
   }
 
   presentToast(message) {
@@ -156,14 +159,39 @@ export class Profile {
 
   showAreaSing(){
     this.showFirma = true;
+    setTimeout(()=>{
+      console.log('iniciando canvas..');
+      this.starComponent();
+    },1000);
   }
 
-  ngAfterViewInit() {
+  
+
+  starComponent() {
     // this.signaturePad is now available
     this.signaturePad.set('minWidth', 5); // set szimek/signature_pad options at runtime
     this.signaturePad.clear(); // invoke functions from szimek/signature_pad API
   }
- 
+  
+  cleanSingArea(){
+    this.signaturePad.clear();
+  }
+
+  saveSing(){
+    console.log(this.signaturePad.toDataURL());
+
+    this.userService.setKitEntregado(parseInt(this.userInfo.inscripcion, 10)).subscribe(res => {
+      console.log(res);
+      if (res['error'] === 0) {
+         this.userInfo.kit_entregado = res['msg'];
+         this.imgFirma = this.signaturePad.toDataURL();
+      }else {
+        console.log(res);
+          this.presentToast(res['msg'])
+      }
+    });
+  }
+
   drawComplete() {
     // will be notified of szimek/signature_pad's onEnd event
     console.log(this.signaturePad.toDataURL());
@@ -256,7 +284,12 @@ export class HomePage {
   
   searchByCode(code) {
     this.param = code;
-    this.getInfoRunner();
+    if(code === '') {
+      this.presentToast('Debes ingresar número de corredor');
+    }else {
+        this.getInfoRunner();
+    }
+    
   }
 
   getInfoRunner(){
@@ -297,132 +330,5 @@ export class HomePage {
     });
   
     toast.present();
-  }
-
-  
-
-  ionViewDidEnter() {
-    // https://github.com/ionic-team/ionic/issues/9071#issuecomment-362920591
-    // Get the height of the fixed item
-   /* let itemHeight = this.fixedContainer.nativeElement.offsetHeight;
-    let scroll = this.content.getScrollElement();
- 
-    // Add preexisting scroll margin to fixed container size
-    itemHeight = Number.parseFloat(scroll.style.marginTop.replace("px", "")) + itemHeight;
-    scroll.style.marginTop = itemHeight + 'px';*/
-  }
- 
-  ionViewDidLoad() {
-    /* Set the Canvas Element and its size
-    this.canvasElement = this.canvas.nativeElement;
-    this.canvasElement.width = this.plt.width() + '';
-    this.canvasElement.height = 200;
-*/
-  //  console.log(this.content._scrollContent);
-   // this.content._scrollContent.nativeElement.style.marginTop = "35px";
- 
-  }
-
-  selectColor(color) {
-    this.selectedColor = color;
-  }
-   
-  startDrawing(ev) {
-    var canvasPosition = this.canvasElement.getBoundingClientRect();
-   
-    this.saveX = ev.touches[0].pageX - canvasPosition.x;
-    this.saveY = ev.touches[0].pageY - canvasPosition.y;
-  }
-   
-  moved(ev) {
-    var canvasPosition = this.canvasElement.getBoundingClientRect();
-   
-    let ctx = this.canvasElement.getContext('2d');
-    let currentX = ev.touches[0].pageX - canvasPosition.x;
-    let currentY = ev.touches[0].pageY - canvasPosition.y;
-   
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = this.selectedColor;
-    ctx.lineWidth = 5;
-   
-    ctx.beginPath();
-    ctx.moveTo(this.saveX, this.saveY);
-    ctx.lineTo(currentX, currentY);
-    ctx.closePath();
-   
-    ctx.stroke();
-   
-    this.saveX = currentX;
-    this.saveY = currentY;
-  }
-   
-   
-  saveCanvasImage() {
-    var dataUrl = this.canvasElement.toDataURL();
-   
-    let ctx = this.canvasElement.getContext('2d');
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // Clears the canvas
-   
-    let name = new Date().getTime() + '.png';
-    let path = this.file.dataDirectory;
-    let options: IWriteOptions = { replace: true };
-   
-    var data = dataUrl.split(',')[1];
-    let blob = this.b64toBlob(data, 'image/png');
-   
-    this.file.writeFile(path, name, blob, options).then(res => {
-      this.storeImage(name);
-    }, err => {
-      console.log('error: ', err);
-    });
-  }
-
-  b64toBlob(b64Data, contentType) {
-    contentType = contentType || '';
-    var sliceSize = 512;
-    var byteCharacters = atob(b64Data);
-    var byteArrays = [];
-   
-    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-      var slice = byteCharacters.slice(offset, offset + sliceSize);
-   
-      var byteNumbers = new Array(slice.length);
-      for (var i = 0; i < slice.length; i++) {
-        byteNumbers[i] = slice.charCodeAt(i);
-      }
-   
-      var byteArray = new Uint8Array(byteNumbers);
-   
-      byteArrays.push(byteArray);
-    }
-   
-    var blob = new Blob(byteArrays, { type: contentType });
-    return blob;
-  }
-
-  storeImage(imageName) {
-    let saveObj = { img: imageName };
-    this.storedImages.push(saveObj);
-    this.storage.set(STORAGE_KEY, this.storedImages).then(() => {
-      setTimeout(() =>  {
-        this.content.scrollToBottom();
-      }, 500);
-    });
-  }
-   
-  removeImageAtIndex(index) {
-    let removed = this.storedImages.splice(index, 1);
-    this.file.removeFile(this.file.dataDirectory, removed[0].img).then(res => {
-    }, err => {
-      console.log('remove err; ' ,err);
-    });
-    this.storage.set(STORAGE_KEY, this.storedImages);
-  }
-   
-  getImagePath(imageName) {
-    let path = this.file.dataDirectory + imageName;
-    // https://ionicframework.com/docs/wkwebview/#my-local-resources-do-not-load
-    path = normalizeURL(path);
-    return path;
   }
 }

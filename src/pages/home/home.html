@@ -1,27 +1,28 @@
 <ion-header>
-  <ion-navbar>
-      <ion-title>RUN ON Escáner</ion-title>
-  </ion-navbar>
-</ion-header>
-
-<ion-content class="centrado"  >
-  <ion-img style="width: 80px; height: 80px;" src="assets/imgs/logo.png"></ion-img>
-  <hr>
-  <ion-list>
-    <ion-item>
-      <ion-label color="primary" stacked>Escanear codigo :</ion-label>
-      
-    </ion-item>
-    <button ion-button round (click)="scan()">Escanear ... </button>
-    
-      <ion-label color="primary" fixed class="center-text">Ó</ion-label>
-    
-
-    <ion-item>
-      <ion-label color="primary" stacked>Buscar corredor :</ion-label>
-      <ion-input type="tel" placeholder="Codigo corredor..." clearInput #inputCorredor></ion-input>
-    </ion-item>
-    <button ion-button round (click)="searchByCode(inputCorredor.value)">Buscar ... </button>
-  </ion-list>
+    <ion-navbar>
+        <ion-title>RUN ON Escáner</ion-title>
+    </ion-navbar>
+  </ion-header>
   
-</ion-content>
+  <ion-content class="centrado"  >
+    <ion-img style="width: 80px; height: 80px;" src="assets/imgs/logo.png"></ion-img>
+    <hr>
+    <ion-list>
+      <ion-item>
+          <ion-label color="primary" stacked>Escanear codigo </ion-label>
+        
+      </ion-item>
+      <button ion-button round (click)="scan()"><ion-icon name="qr-scanner"></ion-icon>&nbsp;Escanear</button>
+      
+        <ion-label color="primary" fixed class="center-text">Ó</ion-label>
+      
+  
+      <ion-item>
+        <ion-label color="primary" stacked>Buscar corredor :</ion-label>
+        <ion-input type="tel" placeholder="Número de Corredor" clearInput #inputCorredor></ion-input>
+      </ion-item>
+      <button ion-button round (click)="searchByCode(inputCorredor.value)"><ion-icon name="search"></ion-icon>
+  &nbsp;Buscar</button>
+    </ion-list>
+    
+  </ion-content>
