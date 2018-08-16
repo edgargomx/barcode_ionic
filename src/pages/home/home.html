@@ -1,61 +1,28 @@
 <ion-header>
-  <ion-navbar>
-      <ion-title>RA - RUN ON</ion-title>
-  </ion-navbar>
-</ion-header>
-
-<ion-content class="centrado"  >
-  <ion-img style="width: 80px; height: 80px;" src="assets/imgs/logo.png"></ion-img>
-  <hr>
-  <ion-list>
-    <ion-item>
-      <ion-label color="primary" stacked>Escanear codigo :</ion-label>
-      <!--ion-input type="tel" placeholder="Tel Input"></ion-input-->
-      
-    </ion-item>
-    <button ion-button round (click)="scan()">Escanear ... </button>
-    
-      <ion-label color="primary" fixed class="center-text">Ó</ion-label>
-      <!--ion-input type="tel" placeholder="Tel Input"></ion-input-->
-    
-
-    <ion-item>
-      <ion-label color="primary" stacked>Buscar corredor :</ion-label>
-      <ion-input type="tel" placeholder="Codigo corredor..." clearInput #inputCorredor></ion-input>
-    </ion-item>
-    <button ion-button round (click)="searchByCode(inputCorredor.value)">Buscar ... </button>
-  </ion-list>
+    <ion-navbar>
+        <ion-title>RUN ON Escáner</ion-title>
+    </ion-navbar>
+  </ion-header>
   
-  <!--ion-input type="text" [(ngModel)]="encodeData" ></ion-input>   
-  <button ion-button (click)="encodeText()">Encode Text</button-->
-
-  <!--div #fixedContainer>
-    <ion-row>
-      <ion-col *ngFor="let color of colors" [style.background]="color" class="color-block" tappable (click)="selectColor(color)"></ion-col>
-    </ion-row>
- 
-    <ion-row radio-group [(ngModel)]="selectedColor">
-      <ion-col *ngFor="let color of colors" text-center>
-        <ion-radio [value]="color"></ion-radio>
-      </ion-col>
-    </ion-row>
- 
-    <canvas #imageCanvas (touchstart)="startDrawing($event)" (touchmove)="moved($event)"></canvas>
- 
-    <button ion-button full (click)="saveCanvasImage()">Save Image</button>
-  </div>
- 
-  <ion-list *ngIf="storedImages.length > 0">
-    <ion-list-header>Previous Drawings</ion-list-header>
-    <ion-card *ngFor="let obj of storedImages; let i = index">
-      <ion-card-content>
-        <img [src]="getImagePath(obj.img)">
-      </ion-card-content>
-      <ion-row>
-        <button ion-button full icon-only color="danger" (click)="removeImageAtIndex(i)">
-          <ion-icon name="trash"></ion-icon>
-        </button>
-      </ion-row>
-    </ion-card>
-  </ion-list-->
-</ion-content>
+  <ion-content class="centrado"  >
+    <ion-img style="width: 80px; height: 80px;" src="assets/imgs/logo.png"></ion-img>
+    <hr>
+    <ion-list>
+      <ion-item>
+          <ion-label color="primary" stacked>Escanear codigo </ion-label>
+        
+      </ion-item>
+      <button ion-button round (click)="scan()"><ion-icon name="qr-scanner"></ion-icon>&nbsp;Escanear</button>
+      
+        <ion-label color="primary" fixed class="center-text">Ó</ion-label>
+      
+  
+      <ion-item>
+        <ion-label color="primary" stacked>Buscar corredor :</ion-label>
+        <ion-input type="tel" placeholder="Número de Corredor" clearInput #inputCorredor></ion-input>
+      </ion-item>
+      <button ion-button round (click)="searchByCode(inputCorredor.value)"><ion-icon name="search"></ion-icon>
+  &nbsp;Buscar</button>
+    </ion-list>
+    
+  </ion-content>
