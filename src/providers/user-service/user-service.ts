@@ -31,8 +31,7 @@ export class UserServiceProvider {
     return this.http.get(`https://retodealtura.mx/app_api.php?code=${ dataRunner }`);
   }
 
-  setKitEntregado(id_runner) {
-    const id = id_runner;
-    return this.http.post('https://retodealtura.mx/app_api.php', {id: id_runner}, httpOptions );
+  setKitEntregado(data_runner) {
+    return this.http.post('https://retodealtura.mx/app_api.php', JSON.stringify(data_runner), httpOptions );
   }
 }
