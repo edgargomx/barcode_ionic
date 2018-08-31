@@ -6,7 +6,7 @@
 		<ion-buttons start>
 				<span ion-text color="primary" showWhen="ios">Cancel</span>
 				<ion-icon name="md-close" showWhen="android, windows"></ion-icon>
-			<button ion-button (click)="dismiss()">
+			<button ion-button (click)="close()">
 			</button>
 		</ion-buttons>
 	</ion-toolbar>
@@ -18,7 +18,7 @@
 			<ion-row>
 				<ion-col col-12 col-lg-6>
 					<ion-card>
-						<img src="assets/imgs/san-francisco.jpg"/>
+						<img src="assets/imgs/numero.png"/>
 						<div class="card-title">{{ userInfo.numero }}</div>
 						<div class="card-subtitle">{{ userInfo.distancia }}</div>
 					</ion-card>
@@ -26,9 +26,9 @@
 				<ion-col col-12 col-lg-6>
 					<ion-card>
 						<ion-card-content>
-							<p class="titulo">{{ userInfo.nombre.toUpperCase() }} {{ userInfo.paterno.toUpperCase() }} {{ userInfo.materno.toUpperCase() }}</p>
+							<p class="titulo" *ngIf="userInfo.nombre">{{ userInfo.nombre.toUpperCase() }} {{ userInfo.paterno.toUpperCase() }} {{ userInfo.materno.toUpperCase() }}</p>
 							<p>{{ userInfo.categoria }} ({{ sexo }})</p>
-							<p>21 años</p>
+							<p>{{ calcularEdad(userInfo.nacimiento) }} años</p>
 							<button ion-button round (click)="entregarPaquete()" *ngIf="userInfo.kit_entregado === null && !showFirma"> Entregar Kit</button>
 							<p *ngIf="userInfo.kit_entregado !== null" class="alert"  color="secondary">
 								Kit Entregado<br>{{ userInfo.kit_entregado }}
@@ -48,24 +48,27 @@
 	<ion-list>
 		<div *ngIf="userInfo != undefined">
 			<ion-item>
+				<p>Nombre Contacto de Emergencía : </p> {{ userInfo.em_nombre }}
+			</ion-item>
+			<ion-item>
+				<p>Telefono Contacto de Emergencía : </p>{{ userInfo.em_tel }}
+			</ion-item>
+			<ion-item>
 				<p>Tipo Código : </p> {{ userInfo.codigo }}
 			</ion-item>
 			<ion-item>
 				<p>Estatus Pago : </p>{{ userInfo.status }}
 			</ion-item>
-			<ion-item>
+			<!--ion-item>
 				<p>Productos :</p>
-				<!--p *ngFor="let p of productos">
-					<ion-icon name="checkmark-circle-outline"></ion-icon>&nbsp;{{ p }}
-				</p-->
 				<ul>
 					<li *ngFor="let p of productos">
-							<ion-icon name="checkmark-circle"></ion-icon>&nbsp;{{ p }}
+							<!--ion-icon name="checkmark-circle"></ion-icon>&nbsp;{{ p }}
 					</li>
 				</ul>
 				<!--p>Lista Compra : {{ userInfo.codigo }} </p-->
-				<!--p>Lista Asientos Trasporte : {{ userInfo.numero }} </p-->
-			</ion-item>
+				<!--p>Lista Asientos Trasporte : {{ userInfo.numero }} </p>
+			</ion-item-->
 			<div *ngIf="showFirma">
 				<ion-item>
 					<ion-label>Representante : </ion-label>
@@ -73,33 +76,35 @@
 				</ion-item>
 				<div *ngIf="showDatosRepresentante">
 					<ion-item>
-					<ion-label>Nombre Representante:</ion-label>
-					<ion-input [disabled]="userInfo.kit_entregado !== null" type="text" value="" [(ngModel)]="representanteData.nombre"></ion-input>
+					<!--ion-label>Nombre Representante:</ion-label-->
+					<ion-label color="primary" stacked>Nombre Representante:</ion-label>
+					<ion-input [disabled]="userInfo.kit_entregado !== null" placeholder="Nombre Representante" type="text" value="" [(ngModel)]="representanteData.nombre"></ion-input>
 					</ion-item>
 					<ion-list>
-						<ion-label>Documentos entregados: </ion-label>
-					<ion-item >
+						<!--ion-label>Documentos entregados: </ion-label-->
+						<ion-label color="primary" stacked>Documentos entregados:</ion-label>
+					<ion-item *ngIf="representanteData.documentos">
 						<ion-label>Copia Credencial</ion-label>
 						<ion-checkbox [disabled]="userInfo.kit_entregado !== null" color="blue" [(ngModel)]="representanteData.documentos.copiacredencial"></ion-checkbox>
 					</ion-item>
-					<ion-item
-					>
+					<ion-item *ngIf="representanteData.documentos">
 						<ion-label>Carta Poder</ion-label>
 						<ion-checkbox [disabled]="userInfo.kit_entregado !== null" color="blue" [(ngModel)]="representanteData.documentos.cartapoder"></ion-checkbox>
 					</ion-item>
 					</ion-list>
 				</div>
-
+				<div *ngIf="showFirma && userInfo.kit_entregado === null">
+					<button ion-button round (click)="cleanSingArea()" > Limpiar</button>
+					<button ion-button round (click)="saveSing()" > Guardar</button>
+					<button ion-button round block (click)="getPicture()">Tomar una foto</button>
+				</div>
 				<signature-pad *ngIf="userInfo.kit_entregado === null" [options]="signaturePadOptions" (onBeginEvent)="drawStart()" (onEndEvent)="drawComplete()" #signature ></signature-pad>
 				<img *ngIf="userInfo.kit_entregado !== null" style="max-width: 100%; height: auto;" src="{{ imgFirma }}" />
+				<img [src]="imageCredential" *ngIf="imageCredential" style="max-width: 100%; height: auto;" />
 			</div>
-			<div *ngIf="showFirma && userInfo.kit_entregado === null">
-				<button ion-button round (click)="cleanSingArea()" > Limpiar</button>
-				<button ion-button round (click)="saveSing()" > Guardar</button>
-			</div>
-			<div >
-					<button ion-button round block (click)="getPicture()">Toma una foto</button>
-					<img [src]="imageCredential" *ngIf="imageCredential" style="max-width: 100%; height: auto;" />
+			<div>
+
+
 			</div>
 		</div>
 
@@ -108,6 +113,6 @@
 		<ion-item *ngIf="userInfo.kit_entregado !== null" class="text-red-center">
 			<p>Kit Entregado : </p>{{ userInfo.kit_entregado }}
 		</ion-item>
-		<button ion-button round (click)="dismiss()">Cerrar</button>
+		<!--button ion-button round (click)="close()">Cerrar</button-->
 	</ion-list>
 </ion-content>

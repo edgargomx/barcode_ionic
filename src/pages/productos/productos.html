@@ -1,0 +1,91 @@
+<ion-header>
+	<ion-toolbar>
+		<ion-title>
+			Detalles de Registro
+		</ion-title>
+		<ion-buttons start>
+				<span ion-text color="primary" showWhen="ios">Cancel</span>
+				<ion-icon name="md-close" showWhen="android, windows"></ion-icon>
+			<button ion-button (click)="close()">
+			</button>
+		</ion-buttons>
+	</ion-toolbar>
+</ion-header>
+<ion-content class="centrado">
+	<p class="centrado titulo-evento">{{userInfo.evento}}</p>
+	<div class="card-background-page">
+    <ion-grid>
+			<ion-row>
+				<!--ion-col col-12 col-lg-6>
+					<ion-card>
+						<img src="assets/imgs/san-francisco.jpg"/>
+						<div class="card-title">{{ userInfo.numero }}</div>
+						<div class="card-subtitle">{{ userInfo.distancia }}</div>
+					</ion-card>
+				</ion-col-->
+				<ion-col col-12 col-lg-6>
+					<ion-card>
+						<ion-card-content>
+		          <p  lass="titulo">{{ userInfo.nombre.toUpperCase() }} {{ userInfo.paterno.toUpperCase() }} {{ userInfo.materno.toUpperCase() }}</p>
+							<p>{{ userInfo.categoria }} ({{ sexo }})</p>
+							<p>{{ calcularEdad(userInfo.nacimiento) }} años</p>
+							<button ion-button round (click)="entregarPaquete()" *ngIf="noProductos"> Entregar Productos</button>
+							<p *ngIf="userInfo.produc_entregado !== null" class="alert"  color="secondary">
+								Productos Entregados<br>{{ userInfo.produc_entregado }}
+							</p>
+                			<!--p *ngIf="userInfo.produc_entregado !== null && representanteData.nombre !== null" class="alert">
+                    			Entregado a: <br>{{ representanteData.nombre }}
+                  		</p-->
+						</ion-card-content>
+					</ion-card>
+				</ion-col>
+				<ion-col col-12>
+
+				</ion-col>
+			</ion-row>
+		</ion-grid>
+	</div>
+	<ion-list>
+		<div *ngIf="userInfo != undefined">
+			<ion-item *ngIf="productosEntregados">
+				<p>Productos Entregados:</p>
+				<p *ngFor="let p of productos">
+					<ion-icon name="checkmark-circle-outline" *ngIf="p.statentregado" style="color:green"></ion-icon>
+					<ion-icon name="close-circle" *ngIf="!p.statentregado" style="color:red"></ion-icon>
+					&nbsp;{{ p.name }}
+				</p>
+			</ion-item>
+      <div *ngIf="!productosEntregados">
+        <ion-label>Productos Comprados: </ion-label>
+        <ion-item *ngFor="let p of productos">
+          <ion-label>{{ p.name }}</ion-label>
+          <ion-checkbox color="blue" [disabled]="p.deactivate" #statentregado="ngModel" [(ngModel)]="p.statentregado"  (click)="p.deactivate = p.statentregado"></ion-checkbox>
+        </ion-item>
+      </div>
+			<!--div *ngIf="!productosEntregados">
+        <ion-label>Productos Comprados: </ion-label>
+        <ion-item *ngFor="let p of productos">
+          <ion-label>{{ p.name }}</ion-label>
+          <ion-checkbox color="blue" #statentregado="ngModel" [(ngModel)]="p.statentregado"  (click)="p.deactivate = p.statentregado"></ion-checkbox>
+        </ion-item>
+      </div-->
+			<div *ngIf="showFirmaProd && userInfo.produc_entregado === null">
+				<button ion-button round block (click)="getPicture()">Tomar una foto</button>
+				<button ion-button round (click)="cleanSingArea()" > Limpiar</button>
+				<button ion-button round (click)="saveSing()" > Guardar</button>
+			</div>
+			<div *ngIf="showFirmaProd">
+				<signature-pad *ngIf="userInfo.produc_entregado === null" [options]="signaturePadOptions" #signature ></signature-pad>
+				<img *ngIf="userInfo.produc_entregado !== null" style="max-width: 100%; height: auto;" src="{{ imgFirma }}" />
+				<img [src]="imageCredential" *ngIf="imageCredential" style="max-width: 100%; height: auto;" />
+			</div>
+		</div>
+
+		<!--button ion-button round (click)="showAreaSing()" *ngIf="userInfo.produc_entregado === null"> Firmar</button-->
+		<button ion-button round (click)="entregarPaquete()" *ngIf="noProductos"> Entregar Productos</button>
+		<ion-item *ngIf="userInfo.produc_entregado !== null" class="text-red-center">
+			<p>Productos Entregados : </p>{{ userInfo.produc_entregado }}
+		</ion-item>
+		<!--button ion-button round (click)="close()">Cerrar</button-->
+	</ion-list>
+</ion-content>

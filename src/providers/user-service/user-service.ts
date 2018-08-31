@@ -21,14 +21,14 @@ export class UserServiceProvider {
   }
 
   getInfoRunner(dataRunner: string) {
-    
+
     let headers = new Headers();
     headers.append('Authorization', api_key);
     return this.http.get(`https://retodealtura.mx/app_api.php?qr=${ dataRunner }`, httpOptions);
   }
 
-  getInfoRunnerCode(dataRunner: string) {
-    return this.http.get(`https://retodealtura.mx/app_api.php?code=${ dataRunner }`);
+  getInfoRunnerAsistenciaMedica(dataRunner: string) {
+    return this.http.get(`https://retodealtura.mx/app_api.php?id=${ dataRunner }`, httpOptions);
   }
 
   setKitEntregado(data_runner) {

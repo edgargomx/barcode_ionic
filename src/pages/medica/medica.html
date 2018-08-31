@@ -1,0 +1,73 @@
+<ion-header>
+	<ion-toolbar>
+		<ion-title>
+			Asistencía Medíca
+		</ion-title>
+		<ion-buttons start>
+				<span ion-text color="primary" showWhen="ios">Cancel</span>
+				<ion-icon name="md-close" showWhen="android, windows"></ion-icon>
+			<button ion-button (click)="close()">
+			</button>
+		</ion-buttons>
+	</ion-toolbar>
+</ion-header>
+<ion-content class="centrado">
+  <p class="centrado titulo-evento">{{userInfo.evento}}</p>
+	<div class="card-background-page">
+    <ion-grid>
+			<ion-row>
+				<ion-col col-12 col-lg-6>
+					<ion-card>
+						<img src="assets/imgs/numero.png"/>
+						<div class="card-title">{{ userInfo.numero }}</div>
+						<div class="card-subtitle">{{ userInfo.distancia }}</div>
+					</ion-card>
+				</ion-col>
+				<ion-col col-12 col-lg-6>
+					<ion-title>
+					 Nueva Asistencía Medíca
+					</ion-title>
+					<form #form="ngForm" (ngSubmit)="validDatos(form)" validate class="centrado">
+								<ion-item>
+									<!--ion-label>Nombre Paramedico</ion-label-->
+									<ion-label color="primary" stacked>Nombre Paramedíco:</ion-label>
+									<ion-input type="text" required [(ngModel)]="infoAsistencia.paramedico" name="paramedico" ngControl="paramedico"></ion-input>
+								</ion-item>
+								<ion-item>
+									<ion-label color="primary" stacked>Km de Atención:</ion-label>
+									<ion-input type="tel" placeholder="km" clearInput [(ngModel)]="infoAsistencia.km" name="km" ngControl="km" ></ion-input>
+								</ion-item>
+								<ion-item>
+									<!--ion-label>Descripcion</ion-label-->
+									<ion-label color="primary" stacked>Descripción:</ion-label>
+									<ion-textarea [(ngModel)]="infoAsistencia.descripcion" name="descripcion" rows="5" ngControl="descripcion"></ion-textarea>
+								</ion-item>
+								<button ion-button round><ion-icon name="cloud-upload"></ion-icon>
+								&nbsp;Guardar</button>
+								<!--button ion-button type="submit" block>Add Todo</button-->
+					</form>
+				</ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+	<ion-card>
+		<ion-card-header>Asistencía Medíca Recibida</ion-card-header>
+		<ion-card-content>
+			<!--div class = "row">
+					<div class = "col">FECHA</div>
+					<div class = "col">KM</div>
+					<div class = "col">DESCRIPCIÓN</div>
+					<!--div class = "col">PARAMEDÍCO</div>
+			</div-->
+			<div class = "row list-asistencias" *ngFor="let a of arrayAsistencias">
+					<div class = "col">FECHA: {{a.fecha}}</div>
+					<div class = "col">KM: {{a.km}}</div>
+					<div class="row">
+						<div class = "col">DESCRIPCIÓN: {{a.descripcion}}</div>
+					</div>
+					<!--div class = "col">{{paramedico}}</div-->
+			</div>
+		</ion-card-content>
+	</ion-card>
+
+</ion-content>

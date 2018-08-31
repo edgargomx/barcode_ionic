@@ -17,27 +17,25 @@ import { HomePage } from '../pages/home/home';
 import { PerfilPage } from '../pages/perfil/perfil';
 import { UserServiceProvider } from '../providers/user-service/user-service';
 
+import { TabsPage, InformacionPage, MedicaPage, ProductosPage, PrincipalPage } from '../pages/index.paginas';
+
 @NgModule({
   declarations: [
     MyApp,
     HomePage,
-    PerfilPage
-
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     HttpModule,
     SignaturePadModule,
-    IonicModule.forRoot(MyApp),   
-    IonicStorageModule.forRoot() 
+    IonicModule.forRoot(MyApp),
+    IonicStorageModule.forRoot()
   ],
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
     HomePage,
-    PerfilPage
-    
   ],
   providers: [
     StatusBar,

@@ -2,6 +2,7 @@ import { Component, ViewChild} from '@angular/core';
 import { NavController,NavParams, Platform, ViewController, ToastController  } from 'ionic-angular';
 import { UserServiceProvider } from '../../providers/user-service/user-service';
 import { SignaturePad } from 'angular2-signaturepad/signature-pad';
+import { Camera, CameraOptions } from '@ionic-native/camera';
 
 @Component({
   selector: 'page-perfil',
@@ -21,29 +22,27 @@ export class PerfilPage {
   showFirma = false;
   imgFirma;
   representante;
-  showDatosRepresentante; 
+  showDatosRepresentante;
   representanteData: RepresentanteData;
+  msgerror;
+  imageCredential;
+
  constructor(public navCtrl: NavController, public params: NavParams,
             public userService: UserServiceProvider,
-            public platform: Platform, 
+            public platform: Platform,
+            private camera: Camera,
             private toastCtrl: ToastController,
             public viewCtrl: ViewController) {
               this.userInfo = JSON.parse(this.params.get('user'));
-              this.representanteData = {
-                nombre: '',
-                documentos: {
-                  copiacredencial: false,
-                  cartapoder: false
-                }
-              }
+              this.representanteData = new RepresentanteData();
  }
   dismiss() {
   this.viewCtrl.dismiss();
   }
   entregarPaquete(){
     console.log(this.userInfo);
-    this.showAreaSing(); 
-    this.signatureArea.setFocus();
+    this.showAreaSing();
+   // this.signatureArea.setFocus();
   }
 
   presentToast(message) {
@@ -52,18 +51,18 @@ export class PerfilPage {
       duration: 2000,
       position: 'top',
     });
-  
+
     toast.onDidDismiss(() => {
       console.log('Dismissed toast');
     });
-  
+
     toast.present();
   }
 
   showAreaSing(){
     this.showFirma = true;
     setTimeout(()=>{
-      console.log('iniciando canvas..');      
+      console.log('iniciando canvas..');
       this.starComponent();
     },1000);
   }
@@ -83,16 +82,31 @@ export class PerfilPage {
     }
   }
 
-
+  getPicture(){
+    let options: CameraOptions = {
+      destinationType: this.camera.DestinationType.DATA_URL,
+      targetWidth: 1000,
+      targetHeight: 1000,
+      quality: 100
+    }
+    this.camera.getPicture( options )
+    .then(imageData => {
+      this.imageCredential = `data:image/jpeg;base64,${imageData}`;
+    })
+    .catch(error =>{
+      console.error( error );
+    });
+  }
 
   starComponent() {
     // this.signaturePad is now available
     this.signaturePad.set('minWidth', 5); // set szimek/signature_pad options at runtime
     this.signaturePad.clear(); // invoke functions from szimek/signature_pad API
   }
-  
+
   cleanSingArea(){
     this.signaturePad.clear();
+    this.presentToast('Falta firmar de entrega de paquete');
   }
 
   saveSing(){
@@ -101,24 +115,32 @@ export class PerfilPage {
     const datos = {
       id: parseInt(this.userInfo.inscripcion, 10),
       img: this.signaturePad.toDataURL(),
-      representante: (this.representanteData !== undefined) ? this.representanteData.nombre.toUpperCase() : null,
+      representante: (this.representanteData.nombre !== null) ? this.representanteData.nombre : null,
       docs: (this.representanteData !== undefined) ? JSON.stringify(this.representanteData.documentos) : null
     }
-    if(this.representante){
-        if(datos.representante !== ''){
-          if(this.representante.documentos.copiacredencial || this.representante.documentos.cartapoder){
-            if(datos.img != ''){
+    console.log(this.representante);
+    const firmaBlanco= new CanvasBlank();
+    if(datos.img != firmaBlanco.img){
+      if(this.representante){
+          if(datos.representante !== null){
+            if(this.representanteData.documentos.copiacredencial || this.representanteData.documentos.cartapoder){
               this.setInfoEntrega(datos);
             }else{
-              this.presentToast('Falta firmar de entrega de paquete');
+              this.msgerror = 'Falta un documento';
+              this.presentToast('Falta un documento');
             }
           }else{
-            this.presentToast('Falta un documento');
+            this.msgerror = 'Debes ingresar un nombre de representante';
+            this.presentToast('Debes ingresar un nombre de representante')
           }
-        }else{
-          this.presentToast('Debes ingresar un nombre de representante')
-        }
+      }else{
+        this.setInfoEntrega(datos);
+      }
+    }else{
+      this.msgerror = 'Falta firmar de entrega de paquete';
+      this.presentToast('Falta firmar de entrega de paquete');
     }
+
   }
 
   setInfoEntrega(datos){
@@ -140,7 +162,7 @@ export class PerfilPage {
     // will be notified of szimek/signature_pad's onEnd event
     console.log(this.signaturePad.toDataURL());
   }
- 
+
   drawStart() {
     // will be notified of szimek/signature_pad's onBegin event
     console.log('begin drawing');
@@ -148,8 +170,8 @@ export class PerfilPage {
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad PerfilPage');
-   
-   console.log(this.userInfo);    
+
+   console.log(this.userInfo);
    if (this.userInfo.descr !== null) {
          let aux = this.userInfo.descr.replace('Inscripción,','')
          .replace(';Cargo por servicio,','')
@@ -180,7 +202,7 @@ export class PerfilPage {
    } else {
     this.sexo = "Varonil";
    }
-   if(this.userInfo.representante !== null){ 
+   if(this.userInfo.representante !== null){
     this.representante = true;
     this.showDatosRepresentante = true;
     this.representanteData.nombre = this.userInfo.representante;
@@ -200,10 +222,21 @@ export class PerfilPage {
 
 }
 
-interface RepresentanteData{
-  nombre: string;
+class RepresentanteData{
+  nombre: null;
   documentos: {
-    copiacredencial: boolean;
-    cartapoder: boolean;
+    copiacredencial: false;
+    cartapoder: false;
   }
+}
+
+class etapasEntrega{
+  paso1: false;
+  paso2: false;
+  paso3: false;
+  paso4: false;
+}
+
+class CanvasBlank {
+  img = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAArwAAAEsCAYAAAAhNGCdAAADRElEQVR4nO3BAQEAAACCIP+vbkhAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPwa0yAAAXNAY0UAAAAASUVORK5CYII=';
 }
