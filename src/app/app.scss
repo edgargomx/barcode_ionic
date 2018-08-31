@@ -82,12 +82,10 @@ ion-card {
 
 signature-pad {
 	canvas {
-		border: 1px solid #000;
-		max-width: 100%;
-		margin: 0 auto;
+		border: 1px solid #000;		
 	}
 }
-
+/*
 canvas {
 		display: block;
 		border: 1px solid rgb(187, 178, 178);
@@ -95,7 +93,7 @@ canvas {
 	.color-block {
 		height: 40px;
 	}
-
+*/
 .footer {
 			 position: relative;
 			 width: 100%;

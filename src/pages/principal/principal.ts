@@ -113,7 +113,7 @@ export class PrincipalPage {
 
   cleanSingArea(){
     this.signaturePad.clear();
-    this.presentToast('Falta firmar de entrega de paquete');
+    //this.presentToast('Falta firmar de entrega de paquete');
   }
 
   saveSing(){
