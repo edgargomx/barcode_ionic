@@ -1,9 +1,6 @@
 import { Component, Renderer, ViewChild } from '@angular/core';
-import { IonicPage, NavController,NavParams, ToastController, LoadingController  } from 'ionic-angular';
-import { BarcodeScanner ,BarcodeScannerOptions } from '@ionic-native/barcode-scanner';
+import { IonicPage, NavController,NavParams, ToastController, LoadingController, Content  } from 'ionic-angular';
 import { UserServiceProvider } from '../../providers/user-service/user-service';
-import { ModalController } from 'ionic-angular';
-import { PerfilPage } from '../perfil/perfil';
 import { SignaturePad } from 'angular2-signaturepad/signature-pad';
 import { Camera, CameraOptions } from '@ionic-native/camera';
 
@@ -13,6 +10,7 @@ import { Camera, CameraOptions } from '@ionic-native/camera';
   templateUrl: 'principal.html',
 })
 export class PrincipalPage {
+  @ViewChild(Content) content: Content;
   @ViewChild(SignaturePad) signaturePad: SignaturePad;
   @ViewChild('signature') signatureArea;
   private signaturePadOptions: Object = { // passed through to szimek/signature_pad constructor
@@ -32,6 +30,7 @@ export class PrincipalPage {
   imageCredential;
   userInfo;
   loader;
+  firma_ok = false;
   constructor(public navCtrl: NavController, public navParams: NavParams,
              public userService: UserServiceProvider,
              public loadingCtrl: LoadingController,
@@ -44,6 +43,7 @@ export class PrincipalPage {
                 content: "Guardando...",
                 spinner: "bubbles"
               });
+              
   }
 
   close(){
@@ -113,8 +113,16 @@ export class PrincipalPage {
 
   cleanSingArea(){
     this.signaturePad.clear();
+    this.signaturePad.on();
+    this.firma_ok = false;
     //this.presentToast('Falta firmar de entrega de paquete');
   }
+
+  setFirma(){
+    this.signaturePad.off();
+    this.firma_ok = true;
+  }
+
 
   saveSing(){
     console.log(this.imageCredential)
@@ -127,16 +135,14 @@ export class PrincipalPage {
     }
     const firmaBlanco= new CanvasBlank();
     //datos.img_credencial =  firmaBlanco.ine;
-    console.log(datos);
-    console.log(this.representanteData.nombre);
-    console.log(this.representanteData.documentos);
-    console.log(this.representante);
     if(datos.img_credencial != null || datos.img_credencial  != undefined){
       if(datos.img_firma != firmaBlanco.img2 && datos.img_firma != firmaBlanco.img1){
         if(this.representante){
             if(this.representanteData.nombre !== null || this.representanteData.nombre != undefined){
               datos.representante = this.representanteData.nombre
-               if(this.representanteData.documentos.copiacredencial || this.representanteData.documentos.cartapoder){
+               if(this.representanteData.documentos.copiacredencial || 
+                  this.representanteData.documentos.cartaexoneracion || 
+                  this.representanteData.documentos.cartapoder){
                 datos.docs = JSON.stringify(this.representanteData.documentos)
                 this.setInfoEntrega(datos);
               }else{
@@ -168,7 +174,7 @@ export class PrincipalPage {
       if (res['error'] === 0) {
         this.loader.dismiss();
          this.userInfo.kit_entregado = res['msg'].fecha;
-         this.representanteData.nombre =  res['msg'].representante;
+         this.representanteData.nombre =  (res['msg'].nombre_representante === null) ? this.userInfo.nombre : res['msg'].nombre_representante ;
          this.representanteData.documentos = JSON.parse(res['msg'].documentos);
          console.log(this.representanteData);
          this.imgFirma = this.signaturePad.toDataURL();
@@ -192,6 +198,11 @@ export class PrincipalPage {
   }
 
   ionViewDidLoad() {
+    this.signaturePadOptions = { // passed through to szimek/signature_pad constructor
+      'minWidth': 5,
+      'canvasWidth': this.content.getContentDimensions().contentWidth - 10,
+      'canvasHeight': 300
+    };
 
    if (this.userInfo.descr !== null) {
          let aux = this.userInfo.descr.replace('Inscripción,','')
@@ -227,6 +238,8 @@ export class PrincipalPage {
     this.representante = true;
     this.showDatosRepresentante = true;
     this.representanteData.nombre = this.userInfo.representante;
+   }else{
+    this.representanteData.nombre = this.userInfo.nombre;
    }
    if(this.userInfo.docs !== null){
      //this.showDatosRepresentante = true;
@@ -259,6 +272,7 @@ class RepresentanteData{
   documentos = new Documentos();
 }
 class Documentos {
+  cartaexoneracion = false;
   copiacredencial= false;
   cartapoder= false;
 }

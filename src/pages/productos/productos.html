@@ -59,7 +59,7 @@
         <ion-label>Productos Comprados: </ion-label>
         <ion-item *ngFor="let p of productos">
           <ion-label>{{ p.name }}</ion-label>
-          <ion-checkbox color="blue" [disabled]="p.deactivate" #statentregado="ngModel" [(ngModel)]="p.statentregado"  (click)="p.deactivate = p.statentregado"></ion-checkbox>
+          <ion-checkbox color="blue" #statentregado="ngModel" [(ngModel)]="p.statentregado"  (click)="p.deactivate = p.statentregado"></ion-checkbox>
         </ion-item>
       </div>
 			<!--div *ngIf="!productosEntregados">
@@ -70,9 +70,10 @@
         </ion-item>
       </div-->
 			<div *ngIf="showFirmaProd && userInfo.produc_entregado === null">
-				<button ion-button round block (click)="getPicture()">Tomar una foto</button>
-				<button ion-button round (click)="cleanSingArea()" > Limpiar</button>
-				<button ion-button round (click)="saveSing()" > Guardar</button>
+					<button ion-button round block (click)="getPicture()"><ion-icon name="camera"></ion-icon>&nbsp;Tomar una foto</button>
+					<button ion-button round (click)="cleanSingArea()" ><ion-icon name="create"></ion-icon>&nbsp; Limpiar Firma</button>
+					<button ion-button round (click)="setFirma()" *ngIf="!firma_ok"><ion-icon name="ios-thumbs-up"></ion-icon>&nbsp; Firma ok</button>
+					<button ion-button round (click)="saveSing()" *ngIf="firma_ok"><ion-icon name="cloud-upload"></ion-icon>&nbsp;Guardar</button>	
 			</div>
 			<div *ngIf="showFirmaProd">
 				<signature-pad *ngIf="userInfo.produc_entregado === null" [options]="signaturePadOptions" #signature ></signature-pad>

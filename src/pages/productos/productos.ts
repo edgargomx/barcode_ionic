@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { IonicPage, NavController, NavParams, ToastController, LoadingController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, ToastController, LoadingController, Content } from 'ionic-angular';
 import { SignaturePad } from 'angular2-signaturepad/signature-pad';
 import { Camera, CameraOptions } from '@ionic-native/camera';
 import { UserServiceProvider } from '../../providers/user-service/user-service';
@@ -17,6 +17,7 @@ import { UserServiceProvider } from '../../providers/user-service/user-service';
   templateUrl: 'productos.html',
 })
 export class ProductosPage {
+  @ViewChild(Content) content: Content;
   @ViewChild(SignaturePad) signaturePad: SignaturePad;
   @ViewChild('signature') signatureArea;
   private signaturePadOptions: Object = { // passed through to szimek/signature_pad constructor
@@ -36,6 +37,7 @@ export class ProductosPage {
   productosEntregados = false;
   noProductos = false;
   loader;
+  firma_ok = false;
 
   constructor(public navCtrl: NavController, public navParams: NavParams,
               public userService: UserServiceProvider,
@@ -117,6 +119,14 @@ export class ProductosPage {
 
   cleanSingArea(){
     this.signaturePad.clear();
+    this.signaturePad.on();
+    this.firma_ok = false;
+    //this.presentToast('Falta firmar de entrega de paquete');
+  }
+
+  setFirma(){
+    this.signaturePad.off();
+    this.firma_ok = true;
   }
 
   saveSing(){
@@ -176,9 +186,12 @@ export class ProductosPage {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad PerfilPage');
-
-   console.log(this.userInfo.produc_entregado);
+    console.log(this.content.getContentDimensions().contentWidth);
+    this.signaturePadOptions = { // passed through to szimek/signature_pad constructor
+      'minWidth': 5,
+      'canvasWidth': this.content.getContentDimensions().contentWidth - 10,
+      'canvasHeight': 300
+    };
    if ( this.userInfo.catego_sexo === "0") {
     this.sexo = "Femenil";
    } else {
