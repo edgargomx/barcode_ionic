@@ -1,8 +1,9 @@
 import { Component, Renderer, ViewChild } from '@angular/core';
-import { IonicPage, NavController,NavParams, ToastController, LoadingController, Content  } from 'ionic-angular';
+import { IonicPage, NavController,NavParams, ToastController, LoadingController, Content, AlertController, ModalController } from 'ionic-angular';
 import { UserServiceProvider } from '../../providers/user-service/user-service';
 import { SignaturePad } from 'angular2-signaturepad/signature-pad';
 import { Camera, CameraOptions } from '@ionic-native/camera';
+import { PerfilPage } from '../perfil/perfil';
 
 @IonicPage()
 @Component({
@@ -28,17 +29,31 @@ export class PrincipalPage {
   representanteData: RepresentanteData;
   msgerror;
   imageCredential;
+  beneficiario = '';
+  imageCredentialFront;
+  imageCredentialBack;
+  picture =  {
+    front: false,
+    back: false,
+    message: 'Frontal'
+  }
   userInfo;
   loader;
   firma_ok = false;
+  playera_ok = false;
+  terminos;
+
   constructor(public navCtrl: NavController, public navParams: NavParams,
              public userService: UserServiceProvider,
+             public modalCtrl: ModalController,
              public loadingCtrl: LoadingController,
              private camera: Camera,
+             private alertCtrl: AlertController,
              private toastCtrl: ToastController
             ) {
               this.userInfo = navParams.data;
               this.representanteData = new RepresentanteData();
+              this.getTerminos();
               this.loader = this.loadingCtrl.create({
                 content: "Guardando...",
                 spinner: "bubbles"
@@ -56,6 +71,10 @@ export class PrincipalPage {
    // this.signatureArea.setFocus();
   }
 
+  presentModal() {
+    const modal = this.modalCtrl.create(PerfilPage, { terminos: this.terminos });
+    modal.present();
+  }
   presentToast(message) {
     let toast = this.toastCtrl.create({
       message: message,
@@ -89,16 +108,36 @@ export class PrincipalPage {
     }
   }
 
+  getTerminos(){
+    this.userService.getInfoEvento().subscribe(res => {
+      console.log(res);
+      if(res['error'] == 0){
+        this.terminos = res['msg'].terminos;
+      }
+    });
+  }
+
   getPicture(){
     let options: CameraOptions = {
       destinationType: this.camera.DestinationType.DATA_URL,
-      targetWidth: 1000,
-      targetHeight: 1000,
+      targetWidth: 500,
+      targetHeight: 500,
       quality: 100
     }
     this.camera.getPicture( options )
     .then(imageData => {
-      this.imageCredential = `data:image/jpeg;base64,${imageData}`;
+      const singBlanco= new CanvasBlank();    
+      if(!this.picture.front){
+        this.picture.front = true;
+        this.picture.message = 'Trasera';
+        this.imageCredentialFront = `data:image/jpeg;base64,${imageData}`;
+        // this.imageCredentialFront = singBlanco.ine;
+      }else {
+        this.picture.back = true;        
+        this.imageCredentialBack = `data:image/jpeg;base64,${imageData}`;
+        // this.imageCredentialFront = singBlanco.ine;
+      }
+      
     })
     .catch(error =>{
       console.error( error );
@@ -118,51 +157,56 @@ export class PrincipalPage {
     //this.presentToast('Falta firmar de entrega de paquete');
   }
 
-  setFirma(){
-    this.signaturePad.off();
-    this.firma_ok = true;
+  setFirma(){          
+    this.presentConfirm();
   }
 
+  saveShirtRunner(){
+    this.userService.postShirtRunner(this.userInfo.inscripcion).subscribe(res =>{
+      console.log(res);
+      if(res['error'] == 0) {
+        this.playera_ok = true;
+      }
+    });
+  }
 
   saveSing(){
-    console.log(this.imageCredential)
+    console.log(this.imageCredentialFront)
     const datos = {
       id: parseInt(this.userInfo.inscripcion, 10),
       img_firma: this.signaturePad.toDataURL(),
-      img_credencial: this.imageCredential,
+      img_credencial_front: this.imageCredentialFront,
+      img_credencial_back: this.imageCredentialBack,
       representante:  null,
-      docs: null
+      docs: null,
+      beneficiario: this.beneficiario
     }
     const firmaBlanco= new CanvasBlank();
-    //datos.img_credencial =  firmaBlanco.ine;
-    if(datos.img_credencial != null || datos.img_credencial  != undefined){
-      if(datos.img_firma != firmaBlanco.img2 && datos.img_firma != firmaBlanco.img1){
-        if(this.representante){
-            if(this.representanteData.nombre !== null || this.representanteData.nombre != undefined){
-              datos.representante = this.representanteData.nombre
-               if(this.representanteData.documentos.copiacredencial || 
-                  this.representanteData.documentos.cartaexoneracion || 
-                  this.representanteData.documentos.cartapoder){
-                datos.docs = JSON.stringify(this.representanteData.documentos)
-                this.setInfoEntrega(datos);
-              }else{
-                this.msgerror = 'Falta un documento';
-                this.presentToast('Falta un documento');
-              }
+    //datos.img_credencial_front =  firmaBlanco.ine;
+    if(datos.img_firma != firmaBlanco.img2 && datos.img_firma != firmaBlanco.img1){
+      if(this.representante){
+          if(this.representanteData.nombre !== null || this.representanteData.nombre != undefined){
+            datos.representante = this.representanteData.nombre.toUpperCase();
+            if(this.representanteData.documentos.copiacredencial || 
+                this.representanteData.documentos.cartaexoneracion || 
+                this.representanteData.documentos.cartapoder){
+              datos.docs = JSON.stringify(this.representanteData.documentos)
+              this.setInfoEntrega(datos);
             }else{
-              this.msgerror = 'Debes ingresar un nombre de representante';
-              this.presentToast('Debes ingresar un nombre de representante')
+              this.msgerror = 'Falta un documento';
+              this.presentToast('Falta un documento');
             }
-        }else{
-          datos.docs = JSON.stringify(this.representanteData.documentos)
-          this.setInfoEntrega(datos);
-        }
+          }else{
+            this.msgerror = 'Debes ingresar un nombre de representante';
+            this.presentToast('Debes ingresar un nombre de representante')
+          }
       }else{
-        this.msgerror = 'Falta firmar de entrega de paquete';
-        this.presentToast('Falta firmar de entrega de paquete');
+        datos.docs = JSON.stringify(this.representanteData.documentos)
+        this.setInfoEntrega(datos);
       }
     }else{
-      this.presentToast('Falta fotografiar INE');
+      this.msgerror = 'Falta firmar de entrega de paquete';
+      this.presentToast('Falta firmar de entrega de paquete');
     }
 
   }
@@ -187,14 +231,40 @@ export class PrincipalPage {
     });
   }
 
-  drawComplete() {
-    // will be notified of szimek/signature_pad's onEnd event
-    console.log(this.signaturePad.toDataURL());
-  }
-
-  drawStart() {
-    // will be notified of szimek/signature_pad's onBegin event
-    console.log('begin drawing');
+  presentConfirm() {
+    let alert = this.alertCtrl.create({
+      title: '¿Aceptas la exoneración?',
+      //message: 'Estas de acuerdo con la carta de exoneración',
+      inputs: [
+        {
+          name: 'terminos',
+          type: 'checkbox',
+          label: 'Sí, estoy de acuerdo',
+          value: '1',
+          checked: false
+        }],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => {
+            console.log('Cancel clicked');
+          }
+        },
+        {
+          text: 'Acepto',
+          handler: (data) => {
+            if(data[0] === '1') {
+              this.signaturePad.off(); 
+              this.firma_ok = true;
+            }
+            
+            console.log('Buy clicked', data);
+          }
+        }
+      ]
+    });
+    alert.present();
   }
 
   ionViewDidLoad() {
@@ -248,7 +318,11 @@ export class PrincipalPage {
    if(this.userInfo.firma_kit !== null){
      this.showFirma = true;
      this.imgFirma = this.userInfo.firma_kit;
-     this.imageCredential = this.userInfo.ine_kit;
+     this.imageCredentialFront = this.userInfo.ine_kit;
+     this.imageCredentialBack = this.userInfo.ine_kit_b;
+   }
+   if(this.userInfo.playera_corredor != null){
+      this.playera_ok = true;
    }
    console.log('User', this.userInfo);
   }
@@ -264,6 +338,10 @@ export class PrincipalPage {
     }
 
     return edad;
+  }
+
+  inputUppercase(){
+    this.representanteData.nombre = this.representanteData.nombre.toUpperCase();
   }
 }
 

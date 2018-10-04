@@ -98,8 +98,8 @@ export class ProductosPage {
   getPicture(){
     let options: CameraOptions = {
       destinationType: this.camera.DestinationType.DATA_URL,
-      targetWidth: 1000,
-      targetHeight: 1000,
+      targetWidth: 500,
+      targetHeight: 500,
       quality: 100
     }
     this.camera.getPicture( options )
@@ -140,7 +140,7 @@ export class ProductosPage {
     const firmaBlanco= new CanvasBlank();
     // datos.img_credencial =  firmaBlanco.ine;
     console.log(datos);
-    if(datos.img_credencial != null || datos.img_credencial  != undefined){
+    //if(datos.img_credencial != null || datos.img_credencial  != undefined){
       if(datos.img_firma != firmaBlanco.img2 && datos.img_firma != firmaBlanco.img1){
       /*if(this.representante){
           if(datos.representante !== null){
@@ -161,14 +161,14 @@ export class ProductosPage {
         this.msgerror = 'Falta firmar de entrega de paquete';
         this.presentToast('Falta firmar de entrega de paquete');
       }
-    }else {
+   /* }else {
       this.presentToast('Falta fotografiar INE');
-    }
+    }*/
   }
 
   setInfoEntrega(datos){
     this.loader.present();
-    this.userService.setKitEntregado(datos).subscribe(res => {
+    this.userService.setProductoPayed(datos).subscribe(res => {
       console.log(res);
       if (res['error'] === 0) {
         this.loader.dismiss();
@@ -211,10 +211,12 @@ export class ProductosPage {
            .replace(',Cargo por servicio,','')
            .replace(',Cargo por servicio','')
            .replace('Cargo por servicio,','')
+           .replace('Cargo por Servicio,','')
            .replace('Cargo por servicio','')
-           .replace(',Descuento,','')
+           .replace('Descuento,','')    
            .replace(',Descuento','')
-           .replace('Descuento,','')
+           .replace(',Descuento,','')
+           .replace('Descuento,','')           
            .replace('Descuento','');
            if ( aux === "" ) {
             this.productos = [{name:'NO HAY PRODUCTOS', statentregado: false, deactivate: true}];
@@ -227,9 +229,11 @@ export class ProductosPage {
             } else {
              //this.productos = aux;
               aux.forEach(element => {
+                if(element != ''){
                   this.productos.push({name:element, statentregado: false, deactivate: false});
                   this.noProductos = true;
                   console.log(this.productos);
+                }
               });
             }
            }

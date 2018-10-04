@@ -21,6 +21,14 @@
 			<ion-label color="primary" stacked>Buscar corredor :</ion-label>
 			<ion-input type="tel" placeholder="Número de Corredor" clearInput #inputCorredor></ion-input>
 		</ion-item>
+		<!--ion-item>
+				<ion-label>Distancia</ion-label>
+				<ion-select [(ngModel)]="distancia">
+				  <ion-option value="7">5K</ion-option>
+				  <ion-option value="8">10K</ion-option>
+				  <ion-option value="9">21K</ion-option>
+				</ion-select>
+			  </ion-item-->
 		<button ion-button round (click)="searchByCode(inputCorredor.value)"><ion-icon name="search"></ion-icon>
 		&nbsp;Buscar</button>
 	</ion-list>

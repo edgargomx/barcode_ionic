@@ -23,6 +23,7 @@ import { TabsPage, InformacionPage, MedicaPage, ProductosPage, PrincipalPage } f
   declarations: [
     MyApp,
     HomePage,
+    PerfilPage
   ],
   imports: [
     BrowserModule,
@@ -36,6 +37,7 @@ import { TabsPage, InformacionPage, MedicaPage, ProductosPage, PrincipalPage } f
   entryComponents: [
     MyApp,
     HomePage,
+    PerfilPage
   ],
   providers: [
     StatusBar,

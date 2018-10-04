@@ -20,7 +20,19 @@
 					<ion-card>
 						<img src="assets/imgs/numero.png"/>
 						<div class="card-title">{{ userInfo.numero }}</div>
-						<div class="card-subtitle">{{ userInfo.distancia }}</div>
+						<div class="card-subtitle">{{ userInfo.distancia }}</div>						
+					</ion-card>
+				</ion-col>
+				<ion-col col-12 col-lg-6>
+					<ion-card>
+						<ion-list>
+							<ion-item>
+								<p>Nombre Contacto de Emergencía : </p> {{ userInfo.em_nombre }}
+							</ion-item>
+							<ion-item>
+								<p>Telefono Contacto de Emergencía : </p>{{ userInfo.em_tel }}
+							</ion-item>
+						</ion-list>
 					</ion-card>
 				</ion-col>
 				<ion-col col-12 col-lg-6>

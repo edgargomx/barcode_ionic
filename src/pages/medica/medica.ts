@@ -78,7 +78,7 @@ export class MedicaPage {
 
   setInfoEntrega(){
     this.loader.present();
-    this.userService.setKitEntregado(this.infoAsistencia).subscribe(res => {
+    this.userService.setNewAsistenciaMedica(this.infoAsistencia).subscribe(res => {
       console.log(res);
       if (res['error'] === 0) {
         this.loader.dismiss();

@@ -16,6 +16,7 @@ export class HomePage {
   encodedData : {} ;
   userInfo;
   param ; // = '023f12b8e1d9987cc9a497bb7beeb93b';
+  distancia;
   constructor(public navCtrl: NavController,
               public navParams: NavParams,
               private barcodeScanner: BarcodeScanner,
@@ -52,12 +53,17 @@ export class HomePage {
     });
   }
 
-  searchByCode(code) {
+  searchByCode(code, distancia) {
     this.param = code;
+    console.log(distancia);
     if(code === '') {
       this.presentToast('Debes ingresar número de corredor');
     }else {
+      if(code === '') {
+        this.presentToast('Debes ingresar una distancia');
+      }else {
         this.getInfoRunner();
+      }
     }
 
   }
