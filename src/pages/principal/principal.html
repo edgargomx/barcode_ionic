@@ -55,7 +55,7 @@
 			</ion-item>
 			<ion-item>			
 					<ion-label color="primary" stacked>Nombre Beneficiario Seguro:</ion-label>
-					<ion-input [disabled]="userInfo.kit_entregado !== null" (keyup)="inputUppercase()" placeholder="Nombre Representante" type="text" value="" [(ngModel)]="representanteData.nombre"></ion-input>
+					<ion-input [disabled]="userInfo.kit_entregado !== null" (keyup)="inputUppercase()" placeholder="Nombre Beneficiario" type="text" value="" [(ngModel)]="beneficiario"></ion-input>
 			</ion-item>
 			<div *ngIf="showFirma">
 				<ion-item>

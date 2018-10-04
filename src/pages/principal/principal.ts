@@ -341,7 +341,7 @@ export class PrincipalPage {
   }
 
   inputUppercase(){
-    this.representanteData.nombre = this.representanteData.nombre.toUpperCase();
+    this.beneficiario = this.beneficiario.toUpperCase();
   }
 }
 

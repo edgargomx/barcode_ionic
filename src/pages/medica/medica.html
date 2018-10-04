@@ -30,7 +30,7 @@
 								<p>Nombre Contacto de Emergencía : </p> {{ userInfo.em_nombre }}
 							</ion-item>
 							<ion-item>
-								<p>Telefono Contacto de Emergencía : </p>{{ userInfo.em_tel }}
+								<p>Telefono Contacto de Emergencía : </p><a href="tel:{{ userInfo.em_tel }}">{{ userInfo.em_tel }}</a>
 							</ion-item>
 						</ion-list>
 					</ion-card>
